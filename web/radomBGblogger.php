@@ -1,6 +1,36 @@
 <?php
-  $bg = array('bg-01.jpg', 'bg-02.jpg', 'bg-03.jpg', 'bg-04.jpg', 'bg-05.jpg', 'bg-06.jpg', 'bg-07.jpg' ); // array of filenames
+function LoadJPEG ($imgURL) {
 
-  $i = rand(0, count($bg)-1); // generate random number size of the array
-  $selectedBg = "$bg[$i]"; // set variable equal to which random filename was chosen
+    ##-- Get Image file from Port 80 --##
+    $fp = fopen($imgURL, "r");
+    $imageFile = fread ($fp, 3000000);
+    fclose($fp);
+
+    ##-- Create a temporary file on disk --##
+    $tmpfname = tempnam ("/temp", "IMG");
+
+    ##-- Put image data into the temp file --##
+    $fp = fopen($tmpfname, "w");
+    fwrite($fp, $imageFile);
+    fclose($fp);
+
+    ##-- Load Image from Disk with GD library --##
+    $im = imagecreatefromjpeg ($tmpfname);
+
+    ##-- Delete Temporary File --##
+    unlink($tmpfname);
+
+    ##-- Check for errors --##
+    if (!$im) {
+        print "Could not create JPEG image $imgURL";
+    }
+
+    return $im;
+}
+
+$imageData = LoadJPEG("http://anemurionhotel.com.tr/wp-content/uploads/2016/05/Hd-Abstract-Wallpapers-11-1152x502-1-1024x446.jpg");
+
+Header( "Content-Type: image/jpeg");
+
+imagejpeg($imageData, '', 100);
 ?>
